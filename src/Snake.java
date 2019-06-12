@@ -18,15 +18,16 @@ public class Snake extends Body {
 
     private int speed = 5;
     private int xForNewBody, yForNewBody;
-    private Direction directionForNewBody;
 
     public Snake() {
-        super(200, 320, Direction.RIGHT);
+        super(200, 320);
         img = imgRight;
+        direction = Direction.RIGHT;
+        directionNew = direction;
     }
 
     public void addBody() {
-        bodys.add(new Body(xForNewBody, yForNewBody, directionForNewBody));
+        bodys.add(new Body(xForNewBody, yForNewBody));
     }
 
     public int getCountBody() {
@@ -34,15 +35,10 @@ public class Snake extends Body {
     }
 
     public void move() {
-        setVectorsBody();
         if (x % 40 == 0 && y % 40 == 0) {
             direction = directionNew;
         }
-        for (Body body : bodys) {
-            if (body.x % 40 == 0 && body.y % 40 == 0) {
-                body.direction = body.directionNew;
-            }
-        }
+        setVectorsBody();
         switch (direction) {
             case RIGHT:
                 x += speed;
@@ -57,23 +53,31 @@ public class Snake extends Body {
                 y += speed;
                 break;
         }
+        memory.add(x, y);
     }
 
     private void setVectorsBody() {
+        Vector vector;
         if (bodys.size() > 0) {
-            xForNewBody = getPos(true, )bodys.get(bodys.size() - 1).x;
-            yForNewBody = bodys.get(bodys.size() - 1).y;
+            vector = bodys.get(bodys.size() - 1).memory.pop();
+            xForNewBody = vector.x;
+            yForNewBody = vector.y;
 
             for (int i = bodys.size() - 1; i > 0; i--) {
-                bodys.get(i).x = bodys.get(i - 1).x;
-                bodys.get(i).y = bodys.get(i - 1).y;
+                vector = bodys.get(i - 1).memory.pop();
+                bodys.get(i).x = vector.x;
+                bodys.get(i).y = vector.y;
+                bodys.get(i).memory.add(vector.x, vector.y);
             }
 
-            bodys.get(0).x = x;
-            bodys.get(0).y = y;
+            vector = memory.pop();
+            bodys.get(0).x = vector.x;
+            bodys.get(0).y = vector.y;
+            bodys.get(0).memory.add(vector.x, vector.y);
         } else {
-            xForNewBody = x;
-            yForNewBody = y;
+            vector = memory.pop();
+            xForNewBody = vector.x;
+            yForNewBody = vector.y;
         }
     }
 
